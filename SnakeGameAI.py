@@ -1,13 +1,11 @@
 import pygame
-
 import random
 from enum import Enum
 from collections import namedtuple
+import numpy as np
 
 pygame.init()
 font = pygame.font.SysFont('arial', 25)
-
-
 
 class Direction(Enum):
         RIGHT = 1
@@ -58,34 +56,29 @@ class SnakeGame:
         if self.food in self.snake:
             self._place_food()
 
-    def play_step(self):
+    def play_step(self, action):
+        self.frameIteration += 1
         # 1. collect user input
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and self.direction != Direction.RIGHT:
-                    self.direction = Direction.LEFT
-                elif event.key == pygame.K_RIGHT and self.direction != Direction.LEFT:
-                    self.direction = Direction.RIGHT
-                elif event.key == pygame.K_UP and self.direction != Direction.DOWN:
-                    self.direction = Direction.UP
-                elif event.key == pygame.K_DOWN and self.direction != Direction.UP:
-                    self.direction = Direction.DOWN
             
         # 2. move
-        self._move(self.direction) # update the head
+        self._move(action) # update the head
         self.snake.insert(0, self.head)
 
         # 3. check if game over
+        reward = 0
         gameOver = False
-        if self._is_collision():
+        if self._is_collision() or self.frameIteration > 100*len(self.snake):
             gameOver = True
-            return gameOver, self.score
+            reward = -10
+            return reward, gameOver, self.score
         # 4. place new food or just move
         if self.head == self.food:
             self.score += 1
+            reward += 10
             self._place_food()
         else:
             self.snake.pop()
@@ -95,14 +88,16 @@ class SnakeGame:
         self.clock.tick(SPEED)
 
         # 6. return game over and score
-        return gameOver, self.score
+        return reward, gameOver, self.score
 
-    def _is_collision(self):
+    def _is_collision(self, pt=None):
+        if pt in None:
+            pt = self.head
         # hits boundary
-        if self.head.x > self.width - BLOCK_SIZE or self.head.x < 0 or self.head.y > self.height - BLOCK_SIZE or self.head.y < 0:
+        if pt.x > self.width - BLOCK_SIZE or pt.x < 0 or pt.y > self.height - BLOCK_SIZE or pt.y < 0:
             return True
         # hits self
-        if self.head in self.snake[1:]:
+        if pt in self.snake[1:]:
             return True
 
         return False
@@ -120,30 +115,28 @@ class SnakeGame:
         self.display.blit(text, [0, 0])
         pygame.display.flip()
 
-    def _move(self, direction):
+    def _move(self, action):
+        # [straight, right, left]
+        clockwise = [Direction.RIGHT, Direction.DOWN, Direction.LEFT, Direction.UP]
+        idx = clockwise.index(self.direction)
+
+        if np.array_equal(action, [1, 0, 0]): # straight
+            newDirection = clockwise[idx] 
+        elif np.array_equal(action, [0, 1, 0]): # right turn
+            newDirection = clockwise[(idx+1) % 4]
+        else: # left turn
+            newDirection = clockwise[(idx-1) % 4]
+        self.direction = newDirection
+
         x = self.head.x
         y = self.head.y
-        if direction == Direction.LEFT:
+        if self.direction == Direction.LEFT:
             x -= BLOCK_SIZE
-        elif direction == Direction.RIGHT:
+        elif self.direction == Direction.RIGHT:
             x += BLOCK_SIZE
-        elif direction == Direction.UP:
+        elif self.direction == Direction.UP:
             y -= BLOCK_SIZE
-        elif direction == Direction.DOWN:
+        elif self.direction == Direction.DOWN:
             y += BLOCK_SIZE
 
         self.head = Point(x, y)
-
-if __name__ == '__main__':
-    game = SnakeGame()
-
-    #game loop
-    while True:
-        gameOver, score = game.play_step()
-
-        if gameOver:
-            break
-
-    print('Final Score', score)
-
-    pygame.quit()
