@@ -25,7 +25,7 @@ BLACK = (0, 0, 0)
 BLOCK_SIZE = 20
 SPEED = 20
 
-class SnakeGame:
+class SnakeGameAI:
     def __init__(self, width=640, height=480):
         self.width = width
         self.height = height
@@ -71,7 +71,7 @@ class SnakeGame:
         # 3. check if game over
         reward = 0
         gameOver = False
-        if self._is_collision() or self.frameIteration > 100*len(self.snake):
+        if self.is_collision() or self.frameIteration > 100*len(self.snake):
             gameOver = True
             reward = -10
             return reward, gameOver, self.score
@@ -90,7 +90,7 @@ class SnakeGame:
         # 6. return game over and score
         return reward, gameOver, self.score
 
-    def _is_collision(self, pt=None):
+    def is_collision(self, pt=None):
         if pt in None:
             pt = self.head
         # hits boundary
