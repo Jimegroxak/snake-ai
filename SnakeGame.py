@@ -7,8 +7,6 @@ from collections import namedtuple
 pygame.init()
 font = pygame.font.SysFont('arial', 25)
 
-
-
 class Direction(Enum):
         RIGHT = 1
         LEFT = 2
@@ -24,7 +22,7 @@ BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
-BLOCK_SIZE = 20
+BLOCK_SIZE = 10
 SPEED = 20
 
 class SnakeGame:
@@ -112,7 +110,7 @@ class SnakeGame:
 
         for pt in self.snake:
             pygame.draw.rect(self.display, BLUE1, pygame.Rect(pt.x, pt.y, BLOCK_SIZE, BLOCK_SIZE))
-            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+4, pt.y+4, 12, 12))
+            pygame.draw.rect(self.display, BLUE2, pygame.Rect(pt.x+2, pt.y+2, BLOCK_SIZE* 0.6, BLOCK_SIZE * 0.6))
 
         pygame.draw.rect(self.display, RED, pygame.Rect(self.food.x, self.food.y, BLOCK_SIZE, BLOCK_SIZE))
 

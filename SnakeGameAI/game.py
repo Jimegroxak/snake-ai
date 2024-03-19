@@ -23,10 +23,10 @@ BLUE2 = (0, 100, 255)
 BLACK = (0, 0, 0)
 
 BLOCK_SIZE = 20
-SPEED = 20
+SPEED = 100
 
 class SnakeGameAI:
-    def __init__(self, width=640, height=480):
+    def __init__(self, width=1280, height=960):
         self.width = width
         self.height = height
         # init display
@@ -34,7 +34,8 @@ class SnakeGameAI:
         pygame.display.set_caption('Snake? Snake?! Snaaaaaake!!')
         self.clock = pygame.time.Clock()
 
-        # init game state
+        # init game state after user input
+        input("Press any key to begin")
         self.reset()
     
     def reset(self):
@@ -91,7 +92,7 @@ class SnakeGameAI:
         return reward, gameOver, self.score
 
     def is_collision(self, pt=None):
-        if pt in None:
+        if pt is None:
             pt = self.head
         # hits boundary
         if pt.x > self.width - BLOCK_SIZE or pt.x < 0 or pt.y > self.height - BLOCK_SIZE or pt.y < 0:
